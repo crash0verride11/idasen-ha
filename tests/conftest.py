@@ -32,6 +32,7 @@ async def mock_idasen_desk():
             client=None,
         ):
             mock_desk.is_connected = client is not None
+            mock_desk._client = client
             return mock_desk
 
         patched_idasen_desk.side_effect = mock_init
@@ -40,7 +41,7 @@ async def mock_idasen_desk():
             client_class, ble_device, address, disconnected_callback=None, **kwargs
         ):
             mock_desk.trigger_disconnected_callback = disconnected_callback
-            return MagicMock()
+            return MagicMock(write_gatt_char=AsyncMock())
 
         mock_establish_connection.side_effect = mock_establish_conn
 
@@ -55,6 +56,7 @@ async def mock_idasen_desk():
         mock_desk.disconnect = AsyncMock(side_effect=mock_disconnect)
         mock_desk.wakeup = AsyncMock()
         mock_desk.monitor = AsyncMock(side_effect=mock_monitor)
+        mock_desk.get_height = AsyncMock(return_value=None)
         mock_desk.is_connected = False
         mock_desk.is_moving = False
         mock_desk.trigger_disconnected_callback = None

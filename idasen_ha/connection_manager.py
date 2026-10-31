@@ -5,6 +5,7 @@ from collections.abc import Awaitable, Callable
 import logging
 
 from bleak.backends.device import BLEDevice
+from bleak.backends.service import BleakGATTServiceCollection
 from bleak.exc import BleakDBusError, BleakError
 from bleak_retry_connector import (
     BleakClientWithServiceCache,
@@ -34,6 +35,7 @@ class ConnectionManager:
         self._connecting: bool = False
         self._retry_pending: bool = False
         self._ble_device = ble_device
+        self._cached_services: BleakGATTServiceCollection | None = None
 
         self._idasen_desk: IdasenDesk | None = None
 
@@ -75,7 +77,11 @@ class ConnectionManager:
                     self._ble_device,
                     self._ble_device.address,
                     disconnected_callback=lambda _client: self._handle_disconnect(),
+                    cached_services=self._cached_services,
                 )
+                # Reuse the discovered GATT services on reconnect to skip
+                # service discovery, which is slow over Bluetooth proxies.
+                self._cached_services = client.services
                 self._idasen_desk = IdasenDesk(
                     self._ble_device, exit_on_fail=False, client=client
                 )
