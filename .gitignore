@@ -28,6 +28,9 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
+CLAUDE.md
+idasen_ha/.archive/*
+*.DS_Store
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
